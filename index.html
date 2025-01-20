@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zn-Dev-Contador</title>
+    <style>
+        body {
+            background-color: rgb(13, 148, 13);
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        input[type="number"] {
+            margin: 10px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        input[type="button"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+        input[type="button"]:hover {
+            background-color: #45a049;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Digite um número</h1>
+        <input type="number" id="txtn" placeholder="Número">
+        <input type="button" value="Incrementar" onclick="alterarContador('incrementar')">
+        <input type="button" value="Decrementar" onclick="alterarContador('decrementar')">
+        <h2 id="contadorDisplay">Contador: 0</h2>
+    </div>
+
+    <script>
+        // Função para obter o contador atual
+        async function obterContador() {
+            try {
+                const response = await fetch('http://localhost:3004/contador');
+                const data = await response.json();
+                console.log('Contador obtido:', data.contador); // Log para depurar
+                document.getElementById('contadorDisplay').textContent = 'Contador: ' + data.contador;
+            } catch (error) {
+                console.error('Erro ao obter o contador:', error);
+            }
+        }
+
+        // Função genérica para alterar o contador (incrementar ou decrementar)
+        async function alterarContador(acao) {
+            const numero = document.getElementById('txtn').value;
+            console.log('Número enviado:', numero); // Log para depurar
+            if (numero !== "") {
+                try {
+                    const url = acao === 'incrementar' ? 'http://localhost:3004/contador/incrementar' : 'http://localhost:3004/contador/decrementar';
+                    console.log('Enviando requisição para:', url); // Log para depurar
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ numero: parseInt(numero) })
+                    });
+
+                    const data = await response.json();
+                    console.log('Resposta do servidor:', data.contador); // Log para depurar
+                    document.getElementById('contadorDisplay').textContent = 'Contador: ' + data.contador;
+                } catch (error) {
+                    console.error(`Erro ao ${acao} o contador:`, error);
+                }
+            } else {
+                alert('Por favor, insira um número');
+            }
+        }
+
+        // Inicia o contador ao carregar a página
+        window.onload = function() {
+            obterContador();
+        }
+    </script>
+</body>
+</html>
